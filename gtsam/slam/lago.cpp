@@ -35,11 +35,6 @@ namespace lago {
 static const Matrix I = I_1x1;
 static const Matrix I3 = I_3x3;
 
-static const noiseModel::Diagonal::shared_ptr priorOrientationNoise =
-    noiseModel::Diagonal::Sigmas(Vector1(0));
-static const noiseModel::Diagonal::shared_ptr priorPose2Noise =
-    noiseModel::Diagonal::Variances(Vector3(1e-6, 1e-6, 1e-8));
-
 /* ************************************************************************* */
 /**
  * Compute the cumulative orientation (without wrapping) wrt the root of a
@@ -190,6 +185,7 @@ GaussianFactorGraph buildLinearOrientationGraph(
     lagoGraph.add(key1, -I, key2, I, deltaThetaRegularized, model_deltaTheta);
   }
   // prior on the anchor orientation
+  static const noiseModel::Diagonal::shared_ptr priorOrientationNoise = noiseModel::Diagonal::Sigmas(Vector1(0));
   lagoGraph.add(initialize::kAnchorKey, I, (Vector(1) << 0.0).finished(), priorOrientationNoise);
   return lagoGraph;
 }
@@ -314,6 +310,7 @@ Values computePoses(const NonlinearFactorGraph& pose2graph,
     }
   }
   // add prior
+  static const noiseModel::Diagonal::shared_ptr priorPose2Noise = noiseModel::Diagonal::Variances(Vector3(1e-6, 1e-6, 1e-8));
   linearPose2graph.add(initialize::kAnchorKey, I3, Vector3(0.0, 0.0, 0.0),
       priorPose2Noise);
 
