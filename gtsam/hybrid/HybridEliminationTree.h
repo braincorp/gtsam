@@ -24,9 +24,7 @@
 namespace gtsam {
 
 /**
- * Elimination Tree type for Hybrid Factor Graphs.
- *
- * @ingroup hybrid
+ * Elimination Tree type for Hybrid
  */
 class GTSAM_EXPORT HybridEliminationTree
     : public EliminationTree<HybridBayesNet, HybridGaussianFactorGraph> {
@@ -37,7 +35,7 @@ class GTSAM_EXPORT HybridEliminationTree
   typedef EliminationTree<HybridBayesNet, HybridGaussianFactorGraph>
       Base;                                    ///< Base class
   typedef HybridEliminationTree This;          ///< This class
-  typedef std::shared_ptr<This> shared_ptr;  ///< Shared pointer to this class
+  typedef boost::shared_ptr<This> shared_ptr;  ///< Shared pointer to this class
 
   /// @name Constructors
   /// @{

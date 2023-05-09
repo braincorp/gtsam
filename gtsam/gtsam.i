@@ -66,7 +66,7 @@ class KeySet {
   void serialize() const;
 };
 
-// Actually a vector<Key>, needed for Matlab
+// Actually a vector<Key>
 class KeyVector {
   KeyVector();
   KeyVector(const gtsam::KeyVector& other);

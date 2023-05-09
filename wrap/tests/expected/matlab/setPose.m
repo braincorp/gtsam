@@ -6,4 +6,3 @@ function varargout = setPose(varargin)
       else
         error('Arguments do not match any overload of function setPose');
       end
-end

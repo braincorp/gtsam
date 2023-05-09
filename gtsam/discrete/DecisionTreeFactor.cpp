@@ -18,10 +18,11 @@
  */
 
 #include <gtsam/base/FastSet.h>
-#include <gtsam/hybrid/HybridValues.h>
 #include <gtsam/discrete/DecisionTreeFactor.h>
 #include <gtsam/discrete/DiscreteConditional.h>
 
+#include <boost/make_shared.hpp>
+#include <boost/format.hpp>
 #include <utility>
 
 using namespace std;
@@ -56,16 +57,6 @@ namespace gtsam {
   }
 
   /* ************************************************************************ */
-  double DecisionTreeFactor::error(const DiscreteValues& values) const {
-    return -std::log(evaluate(values));
-  }
-  
-  /* ************************************************************************ */
-  double DecisionTreeFactor::error(const HybridValues& values) const {
-    return error(values.discrete());
-  }
-
-  /* ************************************************************************ */
   double DecisionTreeFactor::safe_div(const double& a, const double& b) {
     // The use for safe_div is when we divide the product factor by the sum
     // factor. If the product or sum is zero, we accord zero probability to the
@@ -78,9 +69,8 @@ namespace gtsam {
                                  const KeyFormatter& formatter) const {
     cout << s;
     cout << " f[";
-    for (auto&& key : keys()) {
-      cout << " (" << formatter(key) << "," << cardinality(key) << "),";
-    }
+    for (auto&& key : keys())
+      cout << boost::format(" (%1%,%2%),") % formatter(key) % cardinality(key);
     cout << " ]" << endl;
     ADT::print("", formatter);
   }
@@ -94,10 +84,7 @@ namespace gtsam {
     for (Key j : f.keys()) cs[j] = f.cardinality(j);
     // Convert map into keys
     DiscreteKeys keys;
-    keys.reserve(cs.size());
-    for (const auto& key : cs) {
-      keys.emplace_back(key);
-    }
+    for (const std::pair<const Key, size_t>& key : cs) keys.push_back(key);
     // apply operand
     ADT result = ADT::apply(f, op);
     // Make a new factor
@@ -107,12 +94,13 @@ namespace gtsam {
   /* ************************************************************************ */
   DecisionTreeFactor::shared_ptr DecisionTreeFactor::combine(
       size_t nrFrontals, ADT::Binary op) const {
-    if (nrFrontals > size()) {
+    if (nrFrontals > size())
       throw invalid_argument(
-          "DecisionTreeFactor::combine: invalid number of frontal "
-          "keys " +
-          std::to_string(nrFrontals) + ", nr.keys=" + std::to_string(size()));
-    }
+          (boost::format(
+               "DecisionTreeFactor::combine: invalid number of frontal "
+               "keys %d, nr.keys=%d") %
+           nrFrontals % size())
+              .str());
 
     // sum over nrFrontals keys
     size_t i;
@@ -128,19 +116,19 @@ namespace gtsam {
       Key j = keys()[i];
       dkeys.push_back(DiscreteKey(j, cardinality(j)));
     }
-    return std::make_shared<DecisionTreeFactor>(dkeys, result);
+    return boost::make_shared<DecisionTreeFactor>(dkeys, result);
   }
 
   /* ************************************************************************ */
   DecisionTreeFactor::shared_ptr DecisionTreeFactor::combine(
       const Ordering& frontalKeys, ADT::Binary op) const {
-    if (frontalKeys.size() > size()) {
+    if (frontalKeys.size() > size())
       throw invalid_argument(
-          "DecisionTreeFactor::combine: invalid number of frontal "
-          "keys " +
-          std::to_string(frontalKeys.size()) + ", nr.keys=" +
-          std::to_string(size()));
-    }
+          (boost::format(
+               "DecisionTreeFactor::combine: invalid number of frontal "
+               "keys %d, nr.keys=%d") %
+           frontalKeys.size() % size())
+              .str());
 
     // sum over nrFrontals keys
     size_t i;
@@ -161,16 +149,16 @@ namespace gtsam {
         continue;
       dkeys.push_back(DiscreteKey(j, cardinality(j)));
     }
-    return std::make_shared<DecisionTreeFactor>(dkeys, result);
+    return boost::make_shared<DecisionTreeFactor>(dkeys, result);
   }
 
   /* ************************************************************************ */
   std::vector<std::pair<DiscreteValues, double>> DecisionTreeFactor::enumerate()
       const {
     // Get all possible assignments
-    DiscreteKeys pairs = discreteKeys();
+    std::vector<std::pair<Key, size_t>> pairs = discreteKeys();
     // Reverse to make cartesian product output a more natural ordering.
-    DiscreteKeys rpairs(pairs.rbegin(), pairs.rend());
+    std::vector<std::pair<Key, size_t>> rpairs(pairs.rbegin(), pairs.rend());
     const auto assignments = DiscreteValues::CartesianProduct(rpairs);
 
     // Construct unordered_map with values
@@ -195,9 +183,7 @@ namespace gtsam {
 
   /* ************************************************************************ */
   static std::string valueFormatter(const double& v) {
-    std::stringstream ss;
-    ss << std::setw(4) << std::setprecision(2) << std::fixed << v;
-    return ss.str();
+    return (boost::format("%4.2g") % v).str();
   }
 
   /** output to graphviz format, stream version */

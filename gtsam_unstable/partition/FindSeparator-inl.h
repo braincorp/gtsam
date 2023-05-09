@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <vector>
-#include <optional>
+#include <boost/tuple/tuple.hpp>
 #include <boost/shared_array.hpp>
 
 #include <gtsam/base/timing.h>
@@ -237,7 +237,7 @@ namespace gtsam { namespace partition {
 
   /* ************************************************************************* */
   template<class GenericGraph>
-  std::optional<MetisResult> separatorPartitionByMetis(const GenericGraph& graph,
+  boost::optional<MetisResult> separatorPartitionByMetis(const GenericGraph& graph,
     const std::vector<size_t>& keys, WorkSpace& workspace, bool verbose) {
     // create a metis graph
     size_t numKeys = keys.size();
@@ -249,8 +249,10 @@ namespace gtsam { namespace partition {
     prepareMetisGraph<GenericGraph>(graph, keys, workspace, &xadj, &adjncy, &adjwgt);
 
     // run ND on the graph
-    const auto [sepsize, part] = separatorMetis(numKeys, xadj, adjncy, adjwgt, verbose);
-    if (!sepsize)  return std::optional<MetisResult>();
+    size_t sepsize;
+    sharedInts part;
+    boost::tie(sepsize, part) = separatorMetis(numKeys, xadj, adjncy, adjwgt, verbose);
+    if (!sepsize)  return boost::optional<MetisResult>();
 
     // convert the 0-1-2 from Metis to 1-2-0, so that the separator is 0, as later
     //  we will have more submaps
@@ -289,7 +291,7 @@ namespace gtsam { namespace partition {
 
   /* *************************************************************************/
   template<class GenericGraph>
-  std::optional<MetisResult> edgePartitionByMetis(const GenericGraph& graph,
+  boost::optional<MetisResult> edgePartitionByMetis(const GenericGraph& graph,
    const std::vector<size_t>& keys, WorkSpace& workspace, bool verbose) {
 
     // a small hack for handling the camera1-camera2 case used in the unit tests
@@ -307,7 +309,9 @@ namespace gtsam { namespace partition {
     prepareMetisGraph<GenericGraph>(graph, keys, workspace, &xadj, &adjncy, &adjwgt);
 
     // run metis on the graph
-    const auto [edgecut, part] = edgeMetis(numKeys, xadj, adjncy, adjwgt, verbose);
+    int edgecut;
+    sharedInts part;
+    boost::tie(edgecut, part) = edgeMetis(numKeys, xadj, adjncy, adjwgt, verbose);
 
     // convert the 0-1-2 from Metis to 1-2-0, so that the separator is 0, as later we will have more submaps
     MetisResult result;
@@ -439,15 +443,15 @@ namespace gtsam { namespace partition {
 
   /* ************************************************************************* */
   template<class GenericGraph>
-  std::optional<MetisResult> findPartitoning(const GenericGraph& graph, const std::vector<size_t>& keys,
+  boost::optional<MetisResult> findPartitoning(const GenericGraph& graph, const std::vector<size_t>& keys,
       WorkSpace& workspace, bool verbose,
-      const std::optional<std::vector<Symbol> >& int2symbol, const bool reduceGraph) {
-    std::optional<MetisResult> result;
+      const boost::optional<std::vector<Symbol> >& int2symbol, const bool reduceGraph) {
+    boost::optional<MetisResult> result;
     GenericGraph reducedGraph;
     std::vector<size_t> keyToPartition;
     std::vector<size_t> cameraKeys, landmarkKeys;
     if (reduceGraph) {
-      if (!int2symbol.has_value())
+      if (!int2symbol.is_initialized())
         throw std::invalid_argument("findSeparator: int2symbol must be valid!");
 
       // find out all the landmark keys, which are to be eliminated
@@ -470,9 +474,9 @@ namespace gtsam { namespace partition {
     }  else // call Metis to partition the graph to A, B, C
       result = separatorPartitionByMetis(graph, keys, workspace, verbose);
 
-    if (!result.has_value()) {
+    if (!result.is_initialized()) {
       std::cout << "metis failed!" << std::endl;
-      return {};
+      return boost::none;
     }
 
     if (reduceGraph) {
@@ -487,10 +491,10 @@ namespace gtsam { namespace partition {
   template<class GenericGraph>
   int findSeparator(const GenericGraph& graph, const std::vector<size_t>& keys,
       const int minNodesPerMap, WorkSpace& workspace, bool verbose,
-      const std::optional<std::vector<Symbol> >& int2symbol, const bool reduceGraph,
+      const boost::optional<std::vector<Symbol> >& int2symbol, const bool reduceGraph,
       const int minNrConstraintsPerCamera, const int minNrConstraintsPerLandmark) {
 
-    std::optional<MetisResult> result = findPartitoning(graph, keys, workspace,
+    boost::optional<MetisResult> result = findPartitoning(graph, keys, workspace,
       verbose, int2symbol, reduceGraph);
 
     // find the island in A and B, and make them separated submaps

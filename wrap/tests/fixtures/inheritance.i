@@ -24,6 +24,3 @@ virtual class MyTemplate : MyBase {
 
 
 virtual class ForwardKinematicsFactor : gtsam::BetweenFactor<gtsam::Pose3> {};
-
-template <T = {double}>
-virtual class ParentHasTemplate : MyTemplate<T> {};

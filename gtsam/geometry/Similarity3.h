@@ -84,7 +84,7 @@ class GTSAM_EXPORT Similarity3 : public LieGroup<Similarity3, 7> {
   /// @{
 
   /// Return an identity transform
-  static Similarity3 Identity();
+  static Similarity3 identity();
 
   /// Composition
   Similarity3 operator*(const Similarity3& S) const;
@@ -98,8 +98,8 @@ class GTSAM_EXPORT Similarity3 : public LieGroup<Similarity3, 7> {
 
   /// Action on a point p is s*(R*p+t)
   Point3 transformFrom(const Point3& p,                          //
-                       OptionalJacobian<3, 7> H1 = {},  //
-                       OptionalJacobian<3, 3> H2 = {}) const;
+                       OptionalJacobian<3, 7> H1 = boost::none,  //
+                       OptionalJacobian<3, 3> H2 = boost::none) const;
 
   /**
    * Action on a pose T.
@@ -120,7 +120,7 @@ class GTSAM_EXPORT Similarity3 : public LieGroup<Similarity3, 7> {
   /**
    *  Create Similarity3 by aligning at least three point pairs
    */
-  static Similarity3 Align(const Point3Pairs& abPointPairs);
+  static Similarity3 Align(const std::vector<Point3Pair>& abPointPairs);
 
   /**
    * Create the Similarity3 object that aligns at least two pose pairs.
@@ -142,21 +142,21 @@ class GTSAM_EXPORT Similarity3 : public LieGroup<Similarity3, 7> {
    * \f$ [R_x,R_y,R_z, t_x, t_y, t_z, \lambda] \f$
    */
   static Vector7 Logmap(const Similarity3& s,  //
-                        OptionalJacobian<7, 7> Hm = {});
+                        OptionalJacobian<7, 7> Hm = boost::none);
 
   /** Exponential map at the identity
    */
   static Similarity3 Expmap(const Vector7& v,  //
-                            OptionalJacobian<7, 7> Hm = {});
+                            OptionalJacobian<7, 7> Hm = boost::none);
 
   /// Chart at the origin
   struct ChartAtOrigin {
     static Similarity3 Retract(const Vector7& v,
-                               ChartJacobian H = {}) {
+                               ChartJacobian H = boost::none) {
       return Similarity3::Expmap(v, H);
     }
     static Vector7 Local(const Similarity3& other,
-                         ChartJacobian H = {}) {
+                         ChartJacobian H = boost::none) {
       return Similarity3::Logmap(other, H);
     }
   };

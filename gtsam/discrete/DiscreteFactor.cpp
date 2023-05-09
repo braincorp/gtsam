@@ -19,7 +19,6 @@
 
 #include <gtsam/base/Vector.h>
 #include <gtsam/discrete/DiscreteFactor.h>
-#include <gtsam/hybrid/HybridValues.h>
 
 #include <cmath>
 #include <sstream>
@@ -27,16 +26,6 @@
 using namespace std;
 
 namespace gtsam {
-
-/* ************************************************************************* */
-double DiscreteFactor::error(const DiscreteValues& values) const {
-  return -std::log((*this)(values));
-}
-
-/* ************************************************************************* */
-double DiscreteFactor::error(const HybridValues& c) const {
-  return this->error(c.discrete());
-}
 
 /* ************************************************************************* */
 std::vector<double> expNormalize(const std::vector<double>& logProbs) {

@@ -83,7 +83,7 @@ class GTSAM_EXPORT Similarity2 : public LieGroup<Similarity2, 4> {
   /// @{
 
   /// Return an identity transform
-  static Similarity2 Identity();
+  static Similarity2 identity();
 
   /// Composition
   Similarity2 operator*(const Similarity2& S) const;
@@ -132,7 +132,7 @@ class GTSAM_EXPORT Similarity2 : public LieGroup<Similarity2, 4> {
    * using the algorithm described here:
    * http://www5.informatik.uni-erlangen.de/Forschung/Publikationen/2005/Zinsser05-PSR.pdf
    */
-  static Similarity2 Align(const Pose2Pairs& abPosePairs);
+  static Similarity2 Align(const std::vector<Pose2Pair>& abPosePairs);
 
   /// @}
   /// @name Lie Group
@@ -143,20 +143,20 @@ class GTSAM_EXPORT Similarity2 : public LieGroup<Similarity2, 4> {
    * \f$ [t_x, t_y, \delta, \lambda] \f$
    */
   static Vector4 Logmap(const Similarity2& S,  //
-                        OptionalJacobian<4, 4> Hm = {});
+                        OptionalJacobian<4, 4> Hm = boost::none);
 
   /// Exponential map at the identity
   static Similarity2 Expmap(const Vector4& v,  //
-                            OptionalJacobian<4, 4> Hm = {});
+                            OptionalJacobian<4, 4> Hm = boost::none);
 
   /// Chart at the origin
   struct ChartAtOrigin {
     static Similarity2 Retract(const Vector4& v,
-                               ChartJacobian H = {}) {
+                               ChartJacobian H = boost::none) {
       return Similarity2::Expmap(v, H);
     }
     static Vector4 Local(const Similarity2& other,
-                         ChartJacobian H = {}) {
+                         ChartJacobian H = boost::none) {
       return Similarity2::Logmap(other, H);
     }
   };
