@@ -42,11 +42,12 @@ class GTSAM_EXPORT DiscreteBayesTreeClique
   typedef DiscreteBayesTreeClique This;
   typedef BayesTreeCliqueBase<DiscreteBayesTreeClique, DiscreteFactorGraph>
       Base;
-  typedef std::shared_ptr<This> shared_ptr;
-  typedef std::weak_ptr<This> weak_ptr;
+  typedef boost::shared_ptr<This> shared_ptr;
+  typedef boost::weak_ptr<This> weak_ptr;
   DiscreteBayesTreeClique() {}
+  virtual ~DiscreteBayesTreeClique() {}
   DiscreteBayesTreeClique(
-      const std::shared_ptr<DiscreteConditional>& conditional)
+      const boost::shared_ptr<DiscreteConditional>& conditional)
       : Base(conditional) {}
 
   /// print index signature only
@@ -61,10 +62,7 @@ class GTSAM_EXPORT DiscreteBayesTreeClique
 };
 
 /* ************************************************************************* */
-/**
- * @brief A Bayes tree representing a Discrete distribution.
- * @ingroup discrete
- */
+/** A Bayes tree representing a Discrete density */
 class GTSAM_EXPORT DiscreteBayesTree
     : public BayesTree<DiscreteBayesTreeClique> {
  private:
@@ -72,7 +70,7 @@ class GTSAM_EXPORT DiscreteBayesTree
 
  public:
   typedef DiscreteBayesTree This;
-  typedef std::shared_ptr<This> shared_ptr;
+  typedef boost::shared_ptr<This> shared_ptr;
 
   /// @name Standard interface
   /// @{

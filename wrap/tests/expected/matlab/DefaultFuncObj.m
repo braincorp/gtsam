@@ -6,4 +6,3 @@ function varargout = DefaultFuncObj(varargin)
       else
         error('Arguments do not match any overload of function DefaultFuncObj');
       end
-end

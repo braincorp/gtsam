@@ -25,6 +25,7 @@
 #include <gtsam/inference/Ordering.h>
 #include <gtsam/base/FastSet.h>
 
+#include <boost/make_shared.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -39,15 +40,8 @@ class DiscreteEliminationTree;
 class DiscreteBayesTree;
 class DiscreteJunctionTree;
 
-/**
- * @brief Main elimination function for DiscreteFactorGraph.
- * 
- * @param factors 
- * @param keys 
- * @return GTSAM_EXPORT
- * @ingroup discrete
- */
-GTSAM_EXPORT std::pair<std::shared_ptr<DiscreteConditional>, DecisionTreeFactor::shared_ptr>
+/** Main elimination function for DiscreteFactorGraph */
+GTSAM_EXPORT std::pair<boost::shared_ptr<DiscreteConditional>, DecisionTreeFactor::shared_ptr>
 EliminateDiscrete(const DiscreteFactorGraph& factors, const Ordering& keys);
 
 /* ************************************************************************* */
@@ -61,24 +55,15 @@ template<> struct EliminationTraits<DiscreteFactorGraph>
   typedef DiscreteBayesTree BayesTreeType;             ///< Type of Bayes tree
   typedef DiscreteJunctionTree JunctionTreeType;       ///< Type of Junction tree
   /// The default dense elimination function
-  static std::pair<std::shared_ptr<ConditionalType>,
-                   std::shared_ptr<FactorType> >
+  static std::pair<boost::shared_ptr<ConditionalType>, boost::shared_ptr<FactorType> >
   DefaultEliminate(const FactorGraphType& factors, const Ordering& keys) {
-    return EliminateDiscrete(factors, keys);
-  }
-  /// The default ordering generation function
-  static Ordering DefaultOrderingFunc(
-      const FactorGraphType& graph,
-      std::optional<std::reference_wrapper<const VariableIndex>> variableIndex) {
-    return Ordering::Colamd((*variableIndex).get());
-  }
+    return EliminateDiscrete(factors, keys); }
 };
 
 /* ************************************************************************* */
 /**
  * A Discrete Factor Graph is a factor graph where all factors are Discrete, i.e.
  *   Factor == DiscreteFactor
- * @ingroup discrete
  */
 class GTSAM_EXPORT DiscreteFactorGraph
     : public FactorGraph<DiscreteFactor>,
@@ -88,7 +73,7 @@ class GTSAM_EXPORT DiscreteFactorGraph
   using Base = FactorGraph<DiscreteFactor>;  ///< base factor graph type
   using BaseEliminateable =
       EliminateableFactorGraph<This>;          ///< for elimination
-  using shared_ptr = std::shared_ptr<This>;  ///< shared_ptr to This
+  using shared_ptr = boost::shared_ptr<This>;  ///< shared_ptr to This
 
   using Values = DiscreteValues;  ///< backwards compatibility
 
@@ -110,6 +95,9 @@ class GTSAM_EXPORT DiscreteFactorGraph
    * constructor */
   template <class DERIVEDFACTOR>
   DiscreteFactorGraph(const FactorGraph<DERIVEDFACTOR>& graph) : Base(graph) {}
+
+  /// Destructor
+  virtual ~DiscreteFactorGraph() {}
 
   /// @name Testable
   /// @{
@@ -151,7 +139,7 @@ class GTSAM_EXPORT DiscreteFactorGraph
    * @return DiscreteBayesNet encoding posterior P(X|Z)
    */
   DiscreteBayesNet sumProduct(
-      OptionalOrderingType orderingType = {}) const;
+      OptionalOrderingType orderingType = boost::none) const;
 
   /**
    * @brief Implement the sum-product algorithm
@@ -168,7 +156,7 @@ class GTSAM_EXPORT DiscreteFactorGraph
    * @return DiscreteLookupDAG DAG with lookup tables
    */
   DiscreteLookupDAG maxProduct(
-      OptionalOrderingType orderingType = {}) const;
+      OptionalOrderingType orderingType = boost::none) const;
 
   /**
    * @brief Implement the max-product algorithm
@@ -185,7 +173,7 @@ class GTSAM_EXPORT DiscreteFactorGraph
    * @return DiscreteValues : MPE
    */
   DiscreteValues optimize(
-      OptionalOrderingType orderingType = {}) const;
+      OptionalOrderingType orderingType = boost::none) const;
 
   /**
    * @brief Find the maximum probable explanation (MPE) by doing max-product.
@@ -217,12 +205,6 @@ class GTSAM_EXPORT DiscreteFactorGraph
    */
   std::string html(const KeyFormatter& keyFormatter = DefaultKeyFormatter,
                    const DiscreteFactor::Names& names = {}) const;
-
-  /// @}
-  /// @name HybridValues methods.
-  /// @{
-
-  using Base::error;  // Expose error(const HybridValues&) method..
 
   /// @}
 };  // \ DiscreteFactorGraph

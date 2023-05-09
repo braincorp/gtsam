@@ -8,4 +8,3 @@ function varargout = DefaultFuncInt(varargin)
       else
         error('Arguments do not match any overload of function DefaultFuncInt');
       end
-end

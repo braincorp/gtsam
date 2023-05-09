@@ -23,14 +23,12 @@
 #include <gtsam/base/Testable.h>
 #include <gtsam/dllexport.h>
 
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
 #include <boost/serialization/extended_type_info.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/optional.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/singleton.hpp>
-#endif
 
 namespace gtsam {
 namespace noiseModel {
@@ -67,7 +65,7 @@ class GTSAM_EXPORT Base {
   /** the rows can be weighted independently according to the error
    * or uniformly with the norm of the right hand side */
   enum ReweightScheme { Scalar, Block };
-  typedef std::shared_ptr<Base> shared_ptr;
+  typedef boost::shared_ptr<Base> shared_ptr;
 
  protected:
   /// Strategy for reweighting \sa ReweightScheme
@@ -117,7 +115,9 @@ class GTSAM_EXPORT Base {
   Vector weight(const Vector &error) const;
 
   /** square root version of the weight function */
-  Vector sqrtWeight(const Vector &error) const;
+  Vector sqrtWeight(const Vector &error) const {
+    return weight(error).cwiseSqrt();
+  }
 
   /** reweight block matrices and a vector according to their weight
    * implementation */
@@ -128,14 +128,12 @@ class GTSAM_EXPORT Base {
   void reweight(Matrix &A1, Matrix &A2, Matrix &A3, Vector &error) const;
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
   void serialize(ARCHIVE &ar, const unsigned int /*version*/) {
     ar &BOOST_SERIALIZATION_NVP(reweight_);
   }
-#endif
 };
 
 /** "Null" robust loss function, equivalent to a Gaussian pdf noise model, or
@@ -149,7 +147,7 @@ class GTSAM_EXPORT Base {
  */
 class GTSAM_EXPORT Null : public Base {
  public:
-  typedef std::shared_ptr<Null> shared_ptr;
+  typedef boost::shared_ptr<Null> shared_ptr;
 
   Null(const ReweightScheme reweight = Block) : Base(reweight) {}
   ~Null() override {}
@@ -160,14 +158,12 @@ class GTSAM_EXPORT Null : public Base {
   static shared_ptr Create();
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
   void serialize(ARCHIVE &ar, const unsigned int /*version*/) {
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
   }
-#endif
 };
 
 /** Implementation of the "Fair" robust error model (Zhang97ivc)
@@ -183,7 +179,7 @@ class GTSAM_EXPORT Fair : public Base {
   double c_;
 
  public:
-  typedef std::shared_ptr<Fair> shared_ptr;
+  typedef boost::shared_ptr<Fair> shared_ptr;
 
   Fair(double c = 1.3998, const ReweightScheme reweight = Block);
   double weight(double distance) const override;
@@ -194,7 +190,6 @@ class GTSAM_EXPORT Fair : public Base {
   double modelParameter() const { return c_; }
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -202,7 +197,6 @@ class GTSAM_EXPORT Fair : public Base {
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     ar &BOOST_SERIALIZATION_NVP(c_);
   }
-#endif
 };
 
 /** The "Huber" robust error model (Zhang97ivc).
@@ -218,7 +212,7 @@ class GTSAM_EXPORT Huber : public Base {
   double k_;
 
  public:
-  typedef std::shared_ptr<Huber> shared_ptr;
+  typedef boost::shared_ptr<Huber> shared_ptr;
 
   Huber(double k = 1.345, const ReweightScheme reweight = Block);
   double weight(double distance) const override;
@@ -229,7 +223,6 @@ class GTSAM_EXPORT Huber : public Base {
   double modelParameter() const { return k_; }
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -237,7 +230,6 @@ class GTSAM_EXPORT Huber : public Base {
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     ar &BOOST_SERIALIZATION_NVP(k_);
   }
-#endif
 };
 
 /** Implementation of the "Cauchy" robust error model (Lee2013IROS).
@@ -258,7 +250,7 @@ class GTSAM_EXPORT Cauchy : public Base {
   double k_, ksquared_;
 
  public:
-  typedef std::shared_ptr<Cauchy> shared_ptr;
+  typedef boost::shared_ptr<Cauchy> shared_ptr;
 
   Cauchy(double k = 0.1, const ReweightScheme reweight = Block);
   double weight(double distance) const override;
@@ -269,7 +261,6 @@ class GTSAM_EXPORT Cauchy : public Base {
   double modelParameter() const { return k_; }
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -278,7 +269,6 @@ class GTSAM_EXPORT Cauchy : public Base {
     ar &BOOST_SERIALIZATION_NVP(k_);
     ar &BOOST_SERIALIZATION_NVP(ksquared_);
   }
-#endif
 };
 
 /** Implementation of the "Tukey" robust error model (Zhang97ivc).
@@ -294,7 +284,7 @@ class GTSAM_EXPORT Tukey : public Base {
   double c_, csquared_;
 
  public:
-  typedef std::shared_ptr<Tukey> shared_ptr;
+  typedef boost::shared_ptr<Tukey> shared_ptr;
 
   Tukey(double c = 4.6851, const ReweightScheme reweight = Block);
   double weight(double distance) const override;
@@ -305,7 +295,6 @@ class GTSAM_EXPORT Tukey : public Base {
   double modelParameter() const { return c_; }
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -313,7 +302,6 @@ class GTSAM_EXPORT Tukey : public Base {
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     ar &BOOST_SERIALIZATION_NVP(c_);
   }
-#endif
 };
 
 /** Implementation of the "Welsch" robust error model (Zhang97ivc).
@@ -329,7 +317,7 @@ class GTSAM_EXPORT Welsch : public Base {
   double c_, csquared_;
 
  public:
-  typedef std::shared_ptr<Welsch> shared_ptr;
+  typedef boost::shared_ptr<Welsch> shared_ptr;
 
   Welsch(double c = 2.9846, const ReweightScheme reweight = Block);
   double weight(double distance) const override;
@@ -340,7 +328,6 @@ class GTSAM_EXPORT Welsch : public Base {
   double modelParameter() const { return c_; }
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -349,7 +336,6 @@ class GTSAM_EXPORT Welsch : public Base {
     ar &BOOST_SERIALIZATION_NVP(c_);
     ar &BOOST_SERIALIZATION_NVP(csquared_);
   }
-#endif
 };
 
 /** Implementation of the "Geman-McClure" robust error model (Zhang97ivc).
@@ -364,7 +350,7 @@ class GTSAM_EXPORT Welsch : public Base {
  */
 class GTSAM_EXPORT GemanMcClure : public Base {
  public:
-  typedef std::shared_ptr<GemanMcClure> shared_ptr;
+  typedef boost::shared_ptr<GemanMcClure> shared_ptr;
 
   GemanMcClure(double c = 1.0, const ReweightScheme reweight = Block);
   ~GemanMcClure() override {}
@@ -379,7 +365,6 @@ class GTSAM_EXPORT GemanMcClure : public Base {
   double c_;
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -387,7 +372,6 @@ class GTSAM_EXPORT GemanMcClure : public Base {
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     ar &BOOST_SERIALIZATION_NVP(c_);
   }
-#endif
 };
 
 /** DCS implements the Dynamic Covariance Scaling robust error model
@@ -404,7 +388,7 @@ class GTSAM_EXPORT GemanMcClure : public Base {
  */
 class GTSAM_EXPORT DCS : public Base {
  public:
-  typedef std::shared_ptr<DCS> shared_ptr;
+  typedef boost::shared_ptr<DCS> shared_ptr;
 
   DCS(double c = 1.0, const ReweightScheme reweight = Block);
   ~DCS() override {}
@@ -419,7 +403,6 @@ class GTSAM_EXPORT DCS : public Base {
   double c_;
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -427,7 +410,6 @@ class GTSAM_EXPORT DCS : public Base {
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     ar &BOOST_SERIALIZATION_NVP(c_);
   }
-#endif
 };
 
 /** L2WithDeadZone implements a standard L2 penalty, but with a dead zone of
@@ -448,7 +430,7 @@ class GTSAM_EXPORT L2WithDeadZone : public Base {
   double k_;
 
  public:
-  typedef std::shared_ptr<L2WithDeadZone> shared_ptr;
+  typedef boost::shared_ptr<L2WithDeadZone> shared_ptr;
 
   L2WithDeadZone(double k = 1.0, const ReweightScheme reweight = Block);
   double weight(double distance) const override;
@@ -459,7 +441,6 @@ class GTSAM_EXPORT L2WithDeadZone : public Base {
   double modelParameter() const { return k_; }
 
  private:
-#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
   friend class boost::serialization::access;
   template <class ARCHIVE>
@@ -467,7 +448,6 @@ class GTSAM_EXPORT L2WithDeadZone : public Base {
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     ar &BOOST_SERIALIZATION_NVP(k_);
   }
-#endif
 };
 
 }  // namespace mEstimator

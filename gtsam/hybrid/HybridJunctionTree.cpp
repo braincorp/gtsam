@@ -31,7 +31,9 @@ template class EliminatableClusterTree<HybridBayesTree,
 template class JunctionTree<HybridBayesTree, HybridGaussianFactorGraph>;
 
 struct HybridConstructorTraversalData {
-  typedef HybridJunctionTree::Node Node;
+  typedef
+      typename JunctionTree<HybridBayesTree, HybridGaussianFactorGraph>::Node
+          Node;
   typedef
       typename JunctionTree<HybridBayesTree,
                             HybridGaussianFactorGraph>::sharedNode sharedNode;
@@ -50,26 +52,19 @@ struct HybridConstructorTraversalData {
 
   // Pre-order visitor function
   static HybridConstructorTraversalData ConstructorTraversalVisitorPre(
-      const std::shared_ptr<HybridEliminationTree::Node>& node,
+      const boost::shared_ptr<HybridEliminationTree::Node>& node,
       HybridConstructorTraversalData& parentData) {
     // On the pre-order pass, before children have been visited, we just set up
     // a traversal data structure with its own JT node, and create a child
     // pointer in its parent.
     HybridConstructorTraversalData data =
         HybridConstructorTraversalData(&parentData);
-    data.junctionTreeNode = std::make_shared<Node>(node->key, node->factors);
+    data.junctionTreeNode = boost::make_shared<Node>(node->key, node->factors);
     parentData.junctionTreeNode->addChild(data.junctionTreeNode);
 
-    // Add all the discrete keys in the hybrid factors to the current data
-    for (const auto& f : node->factors) {
-      if (auto hf = std::dynamic_pointer_cast<HybridFactor>(f)) {
-        for (auto& k : hf->discreteKeys()) {
-          data.discreteKeys.insert(k.first);
-        }
-      } else if (auto hf = std::dynamic_pointer_cast<DecisionTreeFactor>(f)) {
-        for (auto& k : hf->discreteKeys()) {
-          data.discreteKeys.insert(k.first);
-        }
+    for (HybridFactor::shared_ptr& f : node->factors) {
+      for (auto& k : f->discreteKeys()) {
+        data.discreteKeys.insert(k.first);
       }
     }
 
@@ -77,8 +72,8 @@ struct HybridConstructorTraversalData {
   }
 
   // Post-order visitor function
-  static void ConstructorTraversalVisitorPost(
-      const std::shared_ptr<HybridEliminationTree::Node>& node,
+  static void ConstructorTraversalVisitorPostAlg2(
+      const boost::shared_ptr<HybridEliminationTree::Node>& ETreeNode,
       const HybridConstructorTraversalData& data) {
     // In this post-order visitor, we combine the symbolic elimination results
     // from the elimination tree children and symbolically eliminate the current
@@ -91,16 +86,18 @@ struct HybridConstructorTraversalData {
 
     // Do symbolic elimination for this node
     SymbolicFactors symbolicFactors;
-    symbolicFactors.reserve(node->factors.size() +
+    symbolicFactors.reserve(ETreeNode->factors.size() +
                             data.childSymbolicFactors.size());
     // Add ETree node factors
-    symbolicFactors.push_back(node->factors);
+    symbolicFactors += ETreeNode->factors;
     // Add symbolic factors passed up from children
-    symbolicFactors.push_back(data.childSymbolicFactors);
+    symbolicFactors += data.childSymbolicFactors;
 
     Ordering keyAsOrdering;
-    keyAsOrdering.push_back(node->key);
-    const auto [conditional, separatorFactor] =
+    keyAsOrdering.push_back(ETreeNode->key);
+    SymbolicConditional::shared_ptr conditional;
+    SymbolicFactor::shared_ptr separatorFactor;
+    boost::tie(conditional, separatorFactor) =
         internal::EliminateSymbolic(symbolicFactors, keyAsOrdering);
 
     // Store symbolic elimination results in the parent
@@ -108,28 +105,28 @@ struct HybridConstructorTraversalData {
     data.parentData->childSymbolicFactors.push_back(separatorFactor);
     data.parentData->discreteKeys.merge(data.discreteKeys);
 
-    sharedNode jt_node = data.junctionTreeNode;
+    sharedNode node = data.junctionTreeNode;
     const FastVector<SymbolicConditional::shared_ptr>& childConditionals =
         data.childSymbolicConditionals;
-    jt_node->problemSize_ = (int)(conditional->size() * symbolicFactors.size());
+    node->problemSize_ = (int)(conditional->size() * symbolicFactors.size());
 
     // Merge our children if they are in our clique - if our conditional has
     // exactly one fewer parent than our child's conditional.
     const size_t nrParents = conditional->nrParents();
-    const size_t nrChildren = jt_node->nrChildren();
+    const size_t nrChildren = node->nrChildren();
     assert(childConditionals.size() == nrChildren);
 
     // decide which children to merge, as index into children
-    std::vector<size_t> nrChildrenFrontals = jt_node->nrFrontalsOfChildren();
+    std::vector<size_t> nrChildrenFrontals = node->nrFrontalsOfChildren();
     std::vector<bool> merge(nrChildren, false);
     size_t nrFrontals = 1;
     for (size_t i = 0; i < nrChildren; i++) {
       // Check if we should merge the i^th child
       if (nrParents + nrFrontals == childConditionals[i]->nrParents()) {
         const bool myType =
-            data.discreteKeys.exists(conditional->frontals().front());
+            data.discreteKeys.exists(conditional->frontals()[0]);
         const bool theirType =
-            data.discreteKeys.exists(childConditionals[i]->frontals().front());
+            data.discreteKeys.exists(childConditionals[i]->frontals()[0]);
 
         if (myType == theirType) {
           // Increment number of frontal variables
@@ -140,7 +137,7 @@ struct HybridConstructorTraversalData {
     }
 
     // now really merge
-    jt_node->mergeChildren(merge);
+    node->mergeChildren(merge);
   }
 };
 
@@ -160,11 +157,11 @@ HybridJunctionTree::HybridJunctionTree(
   typedef HybridConstructorTraversalData Data;
   Data rootData(0);
   rootData.junctionTreeNode =
-      std::make_shared<typename Base::Node>();  // Make a dummy node to gather
+      boost::make_shared<typename Base::Node>();  // Make a dummy node to gather
                                                   // the junction tree roots
   treeTraversal::DepthFirstForest(eliminationTree, rootData,
                                   Data::ConstructorTraversalVisitorPre,
-                                  Data::ConstructorTraversalVisitorPost);
+                                  Data::ConstructorTraversalVisitorPostAlg2);
 
   // Assign roots from the dummy node
   this->addChildrenAsRoots(rootData.junctionTreeNode);

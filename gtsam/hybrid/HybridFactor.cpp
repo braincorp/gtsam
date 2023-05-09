@@ -50,7 +50,10 @@ DiscreteKeys CollectDiscreteKeys(const DiscreteKeys &key1,
 
 /* ************************************************************************ */
 HybridFactor::HybridFactor(const KeyVector &keys)
-    : Base(keys), isContinuous_(true), continuousKeys_(keys) {}
+    : Base(keys),
+      isContinuous_(true),
+      nrContinuous_(keys.size()),
+      continuousKeys_(keys) {}
 
 /* ************************************************************************ */
 HybridFactor::HybridFactor(const KeyVector &continuousKeys,
@@ -59,6 +62,7 @@ HybridFactor::HybridFactor(const KeyVector &continuousKeys,
       isDiscrete_((continuousKeys.size() == 0) && (discreteKeys.size() != 0)),
       isContinuous_((continuousKeys.size() != 0) && (discreteKeys.size() == 0)),
       isHybrid_((continuousKeys.size() != 0) && (discreteKeys.size() != 0)),
+      nrContinuous_(continuousKeys.size()),
       discreteKeys_(discreteKeys),
       continuousKeys_(continuousKeys) {}
 
@@ -74,33 +78,27 @@ bool HybridFactor::equals(const HybridFactor &lf, double tol) const {
   const This *e = dynamic_cast<const This *>(&lf);
   return e != nullptr && Base::equals(*e, tol) &&
          isDiscrete_ == e->isDiscrete_ && isContinuous_ == e->isContinuous_ &&
-         isHybrid_ == e->isHybrid_ && continuousKeys_ == e->continuousKeys_ &&
-         discreteKeys_ == e->discreteKeys_;
+         isHybrid_ == e->isHybrid_ && nrContinuous_ == e->nrContinuous_;
 }
 
 /* ************************************************************************ */
 void HybridFactor::print(const std::string &s,
                          const KeyFormatter &formatter) const {
-  std::cout << (s.empty() ? "" : s + "\n");
+  std::cout << s;
   if (isContinuous_) std::cout << "Continuous ";
   if (isDiscrete_) std::cout << "Discrete ";
   if (isHybrid_) std::cout << "Hybrid ";
-  std::cout << "[";
-  for (size_t c = 0; c < continuousKeys_.size(); c++) {
+  for (size_t c=0; c<continuousKeys_.size(); c++) {
     std::cout << formatter(continuousKeys_.at(c));
     if (c < continuousKeys_.size() - 1) {
       std::cout << " ";
     } else {
-      std::cout << (discreteKeys_.size() > 0 ? "; " : "");
+      std::cout << "; ";
     }
   }
-  for (size_t d = 0; d < discreteKeys_.size(); d++) {
-    std::cout << formatter(discreteKeys_.at(d).first);
-    if (d < discreteKeys_.size() - 1) {
-      std::cout << " ";
-    }
+  for(auto && discreteKey: discreteKeys_) {
+    std::cout << formatter(discreteKey.first) << " ";
   }
-  std::cout << "]";
 }
 
 }  // namespace gtsam
