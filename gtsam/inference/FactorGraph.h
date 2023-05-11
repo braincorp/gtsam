@@ -22,10 +22,9 @@
 
 #pragma once
 
-#include <gtsam/inference/DotWriter.h>
-#include <gtsam/inference/Key.h>
 #include <gtsam/base/FastVector.h>
 #include <gtsam/base/Testable.h>
+#include <gtsam/inference/Key.h>
 
 #include <Eigen/Core>  // for Eigen::aligned_allocator
 
@@ -37,7 +36,6 @@
 #include <string>
 #include <type_traits>
 #include <utility>
-#include <iosfwd>
 
 namespace gtsam {
 /// Define collection type:
@@ -127,11 +125,6 @@ class FactorGraph {
 
   /** Collection of factors */
   FastVector<sharedFactor> factors_;
-
-  /// Check exact equality of the factor pointers. Useful for derived ==.
-  bool isEqual(const FactorGraph& other) const {
-    return factors_ == other.factors_;
-  }
 
   /// @name Standard Constructors
   /// @{
@@ -295,11 +288,11 @@ class FactorGraph {
   /// @name Testable
   /// @{
 
-  /// Print out graph to std::cout, with optional key formatter.
+  /// print out graph
   virtual void print(const std::string& s = "FactorGraph",
                      const KeyFormatter& formatter = DefaultKeyFormatter) const;
 
-  /// Check equality up to tolerance.
+  /** Check equality */
   bool equals(const This& fg, double tol = 1e-9) const;
   /// @}
 
@@ -361,7 +354,7 @@ class FactorGraph {
    * less than the original, factors at the end will be removed.  If the new
    * size is larger than the original, null factors will be appended.
    */
-  virtual void resize(size_t size) { factors_.resize(size); }
+  void resize(size_t size) { factors_.resize(size); }
 
   /** delete factor without re-arranging indexes by inserting a nullptr pointer
    */
@@ -377,24 +370,6 @@ class FactorGraph {
   iterator erase(iterator first, iterator last) {
     return factors_.erase(first, last);
   }
-
-  /// @}
-  /// @name Graph Display
-  /// @{
-
-  /// Output to graphviz format, stream version.
-  void dot(std::ostream& os,
-           const KeyFormatter& keyFormatter = DefaultKeyFormatter,
-           const DotWriter& writer = DotWriter()) const;
-
-  /// Output to graphviz format string.
-  std::string dot(const KeyFormatter& keyFormatter = DefaultKeyFormatter,
-                  const DotWriter& writer = DotWriter()) const;
-
-  /// output to file with graphviz format.
-  void saveGraph(const std::string& filename,
-                 const KeyFormatter& keyFormatter = DefaultKeyFormatter,
-                 const DotWriter& writer = DotWriter()) const;
 
   /// @}
   /// @name Advanced Interface

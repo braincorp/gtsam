@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import division, print_function
-
+from __future__ import print_function, division
 import os
 import sys
 
@@ -20,7 +19,7 @@ if not os.path.exists(lib):
 
 libsize = os.path.getsize(lib)
 
-print("------", os.path.basename(lib), "file size:", libsize, end="")
+print("------", os.path.basename(lib), "file size:", libsize, end='')
 
 if os.path.exists(save):
     with open(save) as sf:
@@ -35,5 +34,5 @@ if os.path.exists(save):
 else:
     print()
 
-with open(save, "w") as sf:
+with open(save, 'w') as sf:
     sf.write(str(libsize))

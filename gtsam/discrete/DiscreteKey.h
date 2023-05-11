@@ -28,26 +28,21 @@
 namespace gtsam {
 
   /**
-   * Key type for discrete variables.
-   * Includes Key and cardinality.
+   * Key type for discrete conditionals
+   * Includes name and cardinality
    */
-  using DiscreteKey = std::pair<Key,size_t>;
+  typedef std::pair<Key,size_t> DiscreteKey;
 
   /// DiscreteKeys is a set of keys that can be assembled using the & operator
-  struct GTSAM_EXPORT DiscreteKeys: public std::vector<DiscreteKey> {
+  struct DiscreteKeys: public std::vector<DiscreteKey> {
 
-    // Forward all constructors.
-    using std::vector<DiscreteKey>::vector;
-
-    /// Constructor for serialization
-    DiscreteKeys() : std::vector<DiscreteKey>::vector() {}
+    /// Default constructor
+    DiscreteKeys() {
+    }
 
     /// Construct from a key
-    explicit DiscreteKeys(const DiscreteKey& key) { push_back(key); }
-
-    /// Construct from cardinalities.
-    explicit DiscreteKeys(std::map<Key, size_t> cardinalities) {
-      for (auto&& kv : cardinalities) emplace_back(kv);
+    DiscreteKeys(const DiscreteKey& key) {
+      push_back(key);
     }
 
     /// Construct from a vector of keys
@@ -56,13 +51,13 @@ namespace gtsam {
     }
 
     /// Construct from cardinalities with default names
-    DiscreteKeys(const std::vector<int>& cs);
+    GTSAM_EXPORT DiscreteKeys(const std::vector<int>& cs);
 
     /// Return a vector of indices
-    KeyVector indices() const;
+    GTSAM_EXPORT KeyVector indices() const;
 
     /// Return a map from index to cardinality
-    std::map<Key,size_t> cardinalities() const;
+    GTSAM_EXPORT std::map<Key,size_t> cardinalities() const;
 
     /// Add a key (non-const!)
     DiscreteKeys& operator&(const DiscreteKey& key) {

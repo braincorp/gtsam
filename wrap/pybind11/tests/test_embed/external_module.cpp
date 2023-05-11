@@ -9,7 +9,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(external_module, m) {
     class A {
     public:
-        explicit A(int value) : v{value} {};
+        A(int value) : v{value} {};
         int v;
     };
 

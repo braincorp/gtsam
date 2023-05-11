@@ -10,7 +10,7 @@
  * -------------------------------------------------------------------------- */
 
 /**
- *  @file  TestEssentialMatrixConstraint.cpp
+ *  @file  testEssentialMatrixConstraint.cpp
  *  @brief Unit tests for EssentialMatrixConstraint Class
  *  @author Frank Dellaert
  *  @author Pablo Alcantarilla

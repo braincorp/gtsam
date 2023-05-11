@@ -7,7 +7,10 @@
  * @author Alex Cunningham
  */
 
-#include <gtsam_unstable/slam/serialization.h>
+#include <CppUnitLite/TestHarness.h>
+#include <iostream>
+
+#include <gtsam/slam/serialization.h>
 
 #include <gtsam/geometry/Pose2.h>
 #include <gtsam/geometry/Pose3.h>
@@ -15,15 +18,11 @@
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/sam/BearingRangeFactor.h>
 
-#include <CppUnitLite/TestHarness.h>
-
-#include <boost/assign/std/vector.hpp>
-#include <boost/filesystem.hpp>
-
-#include <iostream>
-#include <cstdlib>
+#include <stdlib.h>
 #include <fstream>
 #include <sstream>
+#include <boost/assign/std/vector.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace gtsam;

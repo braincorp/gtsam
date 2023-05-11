@@ -37,16 +37,15 @@ extern "C" {
 #include <mex.h>
 }
 
-#include <boost/cstdint.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include <list>
-#include <set>
-#include <sstream>
-#include <streambuf>
 #include <string>
+#include <sstream>
 #include <typeinfo>
+#include <set>
+#include <streambuf>
 
 using namespace std;
 using namespace boost; // not usual, but for conciseness of generated code
@@ -476,14 +475,6 @@ boost::shared_ptr<Class> unwrap_shared_ptr(const mxArray* obj, const string& pro
 
   boost::shared_ptr<Class>* spp = *reinterpret_cast<boost::shared_ptr<Class>**> (mxGetData(mxh));
   return *spp;
-}
-
-template <typename Class>
-Class* unwrap_ptr(const mxArray* obj, const string& propertyName) {
-
-  mxArray* mxh = mxGetProperty(obj,0, propertyName.c_str());
-  Class* x = reinterpret_cast<Class*> (mxGetData(mxh));
-  return x;
 }
 
 //// throw an error if unwrap_shared_ptr is attempted for an Eigen Vector

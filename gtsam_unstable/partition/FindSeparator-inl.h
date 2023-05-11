@@ -20,10 +20,11 @@
 
 #include "FindSeparator.h"
 
-#include <metis.h>
+#ifndef GTSAM_USE_SYSTEM_METIS
 
 extern "C" {
-#include <metislib.h>
+#include <metis.h>
+#include "metislib.h"
 }
 
 
@@ -565,3 +566,5 @@ namespace gtsam { namespace partition {
   }
 
 }} //namespace
+
+#endif

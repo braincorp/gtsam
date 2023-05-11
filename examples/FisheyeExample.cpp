@@ -122,7 +122,8 @@ int main(int argc, char *argv[]) {
   std::cout << "initial error=" << graph.error(initialEstimate) << std::endl;
   std::cout << "final error=" << graph.error(result) << std::endl;
 
-  graph.saveGraph("examples/vio_batch.dot", result);
+  std::ofstream os("examples/vio_batch.dot");
+  graph.saveGraph(os, result);
 
   return 0;
 }

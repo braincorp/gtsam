@@ -131,30 +131,30 @@ public:
 
   /// @}
 
-#ifdef GTSAM_ALLOW_DEPRECATED_SINCE_V42
   /// @name Deprecated
   /// @{
-  ConstantBias GTSAM_DEPRECATED inverse() { return -(*this); }
-  ConstantBias GTSAM_DEPRECATED compose(const ConstantBias& q) {
+  ConstantBias inverse() {
+    return -(*this);
+  }
+  ConstantBias compose(const ConstantBias& q) {
     return (*this) + q;
   }
-  ConstantBias GTSAM_DEPRECATED between(const ConstantBias& q) {
+  ConstantBias between(const ConstantBias& q) {
     return q - (*this);
   }
-  Vector6 GTSAM_DEPRECATED localCoordinates(const ConstantBias& q) {
-    return (q - (*this)).vector();
+  Vector6 localCoordinates(const ConstantBias& q) {
+    return between(q).vector();
   }
-  ConstantBias GTSAM_DEPRECATED retract(const Vector6& v) {
-    return (*this) + ConstantBias(v);
+  ConstantBias retract(const Vector6& v) {
+    return compose(ConstantBias(v));
   }
-  static Vector6 GTSAM_DEPRECATED Logmap(const ConstantBias& p) {
+  static Vector6 Logmap(const ConstantBias& p) {
     return p.vector();
   }
-  static ConstantBias GTSAM_DEPRECATED Expmap(const Vector6& v) {
+  static ConstantBias Expmap(const Vector6& v) {
     return ConstantBias(v);
   }
   /// @}
-#endif
 
 private:
 

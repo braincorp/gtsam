@@ -1,14 +1,11 @@
 /**
  *  @file   PoseToPointFactor.hpp
- *  @brief  This factor can be used to model relative position measurements
- *  from a (2D or 3D) pose to a landmark
+ *  @brief  This factor can be used to track a 3D landmark over time by
+ *providing local measurements of its location.
  *  @author David Wisth
- *  @author Luca Carlone
  **/
 #pragma once
 
-#include <gtsam/geometry/Point2.h>
-#include <gtsam/geometry/Pose2.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/nonlinear/NonlinearFactor.h>
@@ -20,13 +17,12 @@ namespace gtsam {
  * A class for a measurement between a pose and a point.
  * @addtogroup SLAM
  */
-template<typename POSE = Pose3, typename POINT = Point3>
-class PoseToPointFactor : public NoiseModelFactor2<POSE, POINT> {
+class PoseToPointFactor : public NoiseModelFactor2<Pose3, Point3> {
  private:
   typedef PoseToPointFactor This;
-  typedef NoiseModelFactor2<POSE, POINT> Base;
+  typedef NoiseModelFactor2<Pose3, Point3> Base;
 
-  POINT measured_; /** the point measurement in local coordinates */
+  Point3 measured_; /** the point measurement in local coordinates */
 
  public:
   // shorthand for a smart pointer to a factor
@@ -36,7 +32,7 @@ class PoseToPointFactor : public NoiseModelFactor2<POSE, POINT> {
   PoseToPointFactor() {}
 
   /** Constructor */
-  PoseToPointFactor(Key key1, Key key2, const POINT& measured,
+  PoseToPointFactor(Key key1, Key key2, const Point3& measured,
                     const SharedNoiseModel& model)
       : Base(model, key1, key2), measured_(measured) {}
 
@@ -45,8 +41,8 @@ class PoseToPointFactor : public NoiseModelFactor2<POSE, POINT> {
   /** implement functions needed for Testable */
 
   /** print */
-  void print(const std::string& s, const KeyFormatter& keyFormatter =
-                                       DefaultKeyFormatter) const override {
+  virtual void print(const std::string& s, const KeyFormatter& keyFormatter =
+                                               DefaultKeyFormatter) const {
     std::cout << s << "PoseToPointFactor(" << keyFormatter(this->key1()) << ","
               << keyFormatter(this->key2()) << ")\n"
               << "  measured: " << measured_.transpose() << std::endl;
@@ -54,31 +50,30 @@ class PoseToPointFactor : public NoiseModelFactor2<POSE, POINT> {
   }
 
   /** equals */
-  bool equals(const NonlinearFactor& expected,
-              double tol = 1e-9) const override {
+  virtual bool equals(const NonlinearFactor& expected,
+                      double tol = 1e-9) const {
     const This* e = dynamic_cast<const This*>(&expected);
     return e != nullptr && Base::equals(*e, tol) &&
-           traits<POINT>::Equals(this->measured_, e->measured_, tol);
+           traits<Point3>::Equals(this->measured_, e->measured_, tol);
   }
 
   /** implement functions needed to derive from Factor */
 
   /** vector of errors
-   * @brief Error = w_T_b.inverse()*w_P - measured_
-   * @param w_T_b The pose of the body in world coordinates
-   * @param w_P The estimated point location in world coordinates
+   * @brief Error = wTwi.inverse()*wPwp - measured_
+   * @param wTwi The pose of the sensor in world coordinates
+   * @param wPwp The estimated point location in world coordinates
    *
    * Note: measured_ and the error are in local coordiantes.
    */
-  Vector evaluateError(
-      const POSE& w_T_b, const POINT& w_P,
-      boost::optional<Matrix&> H1 = boost::none,
-      boost::optional<Matrix&> H2 = boost::none) const override {
-    return w_T_b.transformTo(w_P, H1, H2) - measured_;
+  Vector evaluateError(const Pose3& wTwi, const Point3& wPwp,
+                       boost::optional<Matrix&> H1 = boost::none,
+                       boost::optional<Matrix&> H2 = boost::none) const {
+    return wTwi.transformTo(wPwp, H1, H2) - measured_;
   }
 
   /** return the measured */
-  const POINT& measured() const { return measured_; }
+  const Point3& measured() const { return measured_; }
 
  private:
   /** Serialization function */

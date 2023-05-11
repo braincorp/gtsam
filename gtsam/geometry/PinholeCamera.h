@@ -30,7 +30,7 @@ namespace gtsam {
  * \nosubgrouping
  */
 template<typename Calibration>
-class PinholeCamera: public PinholeBaseK<Calibration> {
+class GTSAM_EXPORT PinholeCamera: public PinholeBaseK<Calibration> {
 
 public:
 
@@ -230,15 +230,13 @@ public:
   Point2 _project2(const POINT& pw, OptionalJacobian<2, dimension> Dcamera,
       OptionalJacobian<2, FixedDimension<POINT>::value> Dpoint) const {
     // We just call 3-derivative version in Base
-    if (Dcamera){
-      Matrix26 Dpose;
-      Eigen::Matrix<double, 2, DimK> Dcal;
-      const Point2 pi = Base::project(pw, Dpose, Dpoint, Dcal);
+    Matrix26 Dpose;
+    Eigen::Matrix<double, 2, DimK> Dcal;
+    Point2 pi = Base::project(pw, Dcamera ? &Dpose : 0, Dpoint,
+        Dcamera ? &Dcal : 0);
+    if (Dcamera)
       *Dcamera << Dpose, Dcal;
-      return pi;
-    } else {
-      return Base::project(pw, boost::none, Dpoint, boost::none);
-    }
+    return pi;
   }
 
   /// project a 3D point from world coordinates into the image
@@ -312,16 +310,6 @@ public:
       OptionalJacobian<1, dimension> Dcamera = boost::none,
       OptionalJacobian<1, 6> Dother = boost::none) const {
     return range(camera.pose(), Dcamera, Dother);
-  }
-
-  /// for Linear Triangulation
-  Matrix34 cameraProjectionMatrix() const {
-    return K_.K() * PinholeBase::pose().inverse().matrix().block(0, 0, 3, 4);
-  }
-
-  /// for Nonlinear Triangulation
-  Vector defaultErrorWhenTriangulatingBehindCamera() const {
-    return Eigen::Matrix<double,traits<Point2>::dimension,1>::Constant(2.0 * K_.fx());;
   }
 
 private:

@@ -43,8 +43,7 @@ namespace gtsam {
  * This factor requires that values contains the involved poses (Pose3).
  * @addtogroup SLAM
  */
-class GTSAM_UNSTABLE_EXPORT SmartStereoProjectionPoseFactor
-    : public SmartStereoProjectionFactor {
+class SmartStereoProjectionPoseFactor : public SmartStereoProjectionFactor {
  protected:
   /// shared pointer to calibration object (one for each camera)
   std::vector<boost::shared_ptr<Cal3_S2Stereo>> K_all_;

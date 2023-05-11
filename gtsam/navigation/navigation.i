@@ -18,11 +18,22 @@ class ConstantBias {
 
   // Group
   static gtsam::imuBias::ConstantBias identity();
+  gtsam::imuBias::ConstantBias inverse() const;
+  gtsam::imuBias::ConstantBias compose(const gtsam::imuBias::ConstantBias& b) const;
+  gtsam::imuBias::ConstantBias between(const gtsam::imuBias::ConstantBias& b) const;
 
   // Operator Overloads
   gtsam::imuBias::ConstantBias operator-() const;
   gtsam::imuBias::ConstantBias operator+(const gtsam::imuBias::ConstantBias& b) const;
   gtsam::imuBias::ConstantBias operator-(const gtsam::imuBias::ConstantBias& b) const;
+
+  // Manifold
+  gtsam::imuBias::ConstantBias retract(Vector v) const;
+  Vector localCoordinates(const gtsam::imuBias::ConstantBias& b) const;
+
+  // Lie Group
+  static gtsam::imuBias::ConstantBias Expmap(Vector v);
+  static Vector Logmap(const gtsam::imuBias::ConstantBias& b);
 
   // Standard Interface
   Vector vector() const;
@@ -33,6 +44,9 @@ class ConstantBias {
 
   // enabling serialization functionality
   void serialize() const;
+
+  // enable pickling in python
+  void pickle() const;
 };
 
 }///\namespace imuBias
@@ -59,6 +73,9 @@ class NavState {
 
   // enabling serialization functionality
   void serialize() const;
+
+  // enable pickling in python
+  void pickle() const;
 };
 
 #include <gtsam/navigation/PreintegratedRotation.h>
@@ -104,6 +121,9 @@ virtual class PreintegrationParams : gtsam::PreintegratedRotationParams {
 
   // enabling serialization functionality
   void serialize() const;
+
+  // enable pickling in python
+  void pickle() const;
 };
 
 #include <gtsam/navigation/ImuFactor.h>
@@ -136,6 +156,9 @@ class PreintegratedImuMeasurements {
 
   // enabling serialization functionality
   void serialize() const;
+
+  // enable pickling in python
+  void pickle() const;
 };
 
 virtual class ImuFactor: gtsam::NonlinearFactor {

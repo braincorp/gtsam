@@ -26,7 +26,7 @@
 using namespace std;
 using namespace gtsam;
 
-#ifdef GTSAM_ALLOW_DEPRECATED_SINCE_V42
+#ifdef GTSAM_ALLOW_DEPRECATED_SINCE_V41
 
 static const Cal3_S2 K(625, 625, 0, 0, 0);
 

@@ -121,11 +121,7 @@ public:
 
   /**
    * Add a single IMU measurement to the preintegration.
-   * Both accelerometer and gyroscope measurements are taken to be in the sensor
-   * frame and conversion to the body frame is handled by `body_P_sensor` in
-   * `PreintegrationParams`.
-   *
-   * @param measuredAcc Measured acceleration (as given by the sensor)
+   * @param measuredAcc Measured acceleration (in body frame, as given by the sensor)
    * @param measuredOmega Measured angular velocity (as given by the sensor)
    * @param dt Time interval between this and the last IMU measurement
    */

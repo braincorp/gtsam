@@ -70,7 +70,7 @@ namespace gtsam {
 
     /// @}
 
-  protected:
+  private:
 
     // Private default constructor (used in static construction methods)
     JunctionTree() {}

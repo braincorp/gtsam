@@ -16,8 +16,6 @@
  * @author Richard Roberts
  */
 
-#pragma once
-
 #include <gtsam/discrete/DiscreteFactorGraph.h>
 #include <gtsam/discrete/DiscreteBayesTree.h>
 #include <gtsam/inference/JunctionTree.h>

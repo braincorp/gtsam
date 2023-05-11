@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-#include <iostream>
-#include <sstream>
-
 namespace gtsam {
 /**
  * For Python __str__().
@@ -16,10 +12,14 @@ struct RedirectCout {
   RedirectCout() : ssBuffer_(), coutBuffer_(std::cout.rdbuf(ssBuffer_.rdbuf())) {}
 
   /// return the string
-  std::string str() const;
+  std::string str() const {
+    return ssBuffer_.str();
+  }
 
   /// destructor -- redirect stdout buffer to its original buffer
-  ~RedirectCout();
+  ~RedirectCout() {
+    std::cout.rdbuf(coutBuffer_);
+  }
 
 private:
   std::stringstream ssBuffer_;

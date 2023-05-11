@@ -421,8 +421,4 @@ private:
 };
 // \class BetweenFactorEM
 
-/// traits
-template<class VALUE>
-struct traits<BetweenFactorEM<VALUE> > : public Testable<BetweenFactorEM<VALUE> > {};
-
 }  // namespace gtsam

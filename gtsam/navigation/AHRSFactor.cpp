@@ -168,12 +168,13 @@ Vector AHRSFactor::evaluateError(const Rot3& Ri, const Rot3& Rj,
 }
 
 //------------------------------------------------------------------------------
-Rot3 AHRSFactor::Predict(const Rot3& rot_i, const Vector3& bias,
-                         const PreintegratedAhrsMeasurements& pim) {
-  const Vector3 biascorrectedOmega = pim.predict(bias);
+Rot3 AHRSFactor::Predict(
+    const Rot3& rot_i, const Vector3& bias,
+    const PreintegratedAhrsMeasurements preintegratedMeasurements) {
+  const Vector3 biascorrectedOmega = preintegratedMeasurements.predict(bias);
 
   // Coriolis term
-  const Vector3 coriolis = pim.integrateCoriolis(rot_i);
+  const Vector3 coriolis = preintegratedMeasurements.integrateCoriolis(rot_i);
 
   const Vector3 correctedOmega = biascorrectedOmega - coriolis;
   const Rot3 correctedDeltaRij = Rot3::Expmap(correctedOmega);
@@ -183,26 +184,27 @@ Rot3 AHRSFactor::Predict(const Rot3& rot_i, const Vector3& bias,
 
 //------------------------------------------------------------------------------
 AHRSFactor::AHRSFactor(Key rot_i, Key rot_j, Key bias,
-                       const PreintegratedAhrsMeasurements& pim,
+                       const PreintegratedMeasurements& pim,
                        const Vector3& omegaCoriolis,
                        const boost::optional<Pose3>& body_P_sensor)
-    : Base(noiseModel::Gaussian::Covariance(pim.preintMeasCov_), rot_i, rot_j,
-           bias),
+    : Base(noiseModel::Gaussian::Covariance(pim.preintMeasCov_), rot_i, rot_j, bias),
       _PIM_(pim) {
-  auto p = boost::make_shared<PreintegratedAhrsMeasurements::Params>(pim.p());
+  boost::shared_ptr<PreintegratedMeasurements::Params> p =
+      boost::make_shared<PreintegratedMeasurements::Params>(pim.p());
   p->body_P_sensor = body_P_sensor;
   _PIM_.p_ = p;
 }
 
 //------------------------------------------------------------------------------
 Rot3 AHRSFactor::predict(const Rot3& rot_i, const Vector3& bias,
-                         const PreintegratedAhrsMeasurements& pim,
+                         const PreintegratedMeasurements pim,
                          const Vector3& omegaCoriolis,
                          const boost::optional<Pose3>& body_P_sensor) {
-  auto p = boost::make_shared<PreintegratedAhrsMeasurements::Params>(pim.p());
+  boost::shared_ptr<PreintegratedMeasurements::Params> p =
+      boost::make_shared<PreintegratedMeasurements::Params>(pim.p());
   p->omegaCoriolis = omegaCoriolis;
   p->body_P_sensor = body_P_sensor;
-  PreintegratedAhrsMeasurements newPim = pim;
+  PreintegratedMeasurements newPim = pim;
   newPim.p_ = p;
   return Predict(rot_i, bias, newPim);
 }

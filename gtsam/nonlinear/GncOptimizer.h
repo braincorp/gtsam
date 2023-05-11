@@ -184,8 +184,7 @@ class GTSAM_EXPORT GncOptimizer {
   /// Compute optimal solution using graduated non-convexity.
   Values optimize() {
     NonlinearFactorGraph graph_initial = this->makeWeightedGraph(weights_);
-    BaseOptimizer baseOptimizer(
-        graph_initial, state_, params_.baseOptimizerParams);
+    BaseOptimizer baseOptimizer(graph_initial, state_);
     Values result = baseOptimizer.optimize();
     double mu = initializeMu();
     double prev_cost = graph_initial.error(result);
@@ -229,8 +228,7 @@ class GTSAM_EXPORT GncOptimizer {
 
       // variable/values update
       NonlinearFactorGraph graph_iter = this->makeWeightedGraph(weights_);
-      BaseOptimizer baseOptimizer_iter(
-          graph_iter, state_, params_.baseOptimizerParams);
+      BaseOptimizer baseOptimizer_iter(graph_iter, state_);
       result = baseOptimizer_iter.optimize();
 
       // stopping condition

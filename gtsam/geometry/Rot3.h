@@ -49,14 +49,16 @@
 
 namespace gtsam {
 
-/**
- * @brief Rot3 is a 3D rotation represented as a rotation matrix if the
- * preprocessor symbol GTSAM_USE_QUATERNIONS is not defined, or as a quaternion
- * if it is defined.
- * @addtogroup geometry
- */
-class GTSAM_EXPORT Rot3 : public LieGroup<Rot3, 3> {
- private:
+  /**
+   * @brief A 3D rotation represented as a rotation matrix if the preprocessor
+   * symbol GTSAM_USE_QUATERNIONS is not defined, or as a quaternion if it
+   * is defined.
+   * @addtogroup geometry
+   * \nosubgrouping
+   */
+  class GTSAM_EXPORT Rot3 : public LieGroup<Rot3,3> {
+
+  private:
 
 #ifdef GTSAM_USE_QUATERNIONS
     /** Internal Eigen Quaternion */
@@ -65,7 +67,8 @@ class GTSAM_EXPORT Rot3 : public LieGroup<Rot3, 3> {
     SO3 rot_;
 #endif
 
- public:
+  public:
+
     /// @name Constructors and named constructors
     /// @{
 
@@ -80,7 +83,7 @@ class GTSAM_EXPORT Rot3 : public LieGroup<Rot3, 3> {
      */
     Rot3(const Point3& col1, const Point3& col2, const Point3& col3);
 
-    /// Construct from a rotation matrix, as doubles in *row-major* order !!!
+    /** constructor from a rotation matrix, as doubles in *row-major* order !!! */
     Rot3(double R11, double R12, double R13,
         double R21, double R22, double R23,
         double R31, double R32, double R33);
@@ -515,16 +518,11 @@ class GTSAM_EXPORT Rot3 : public LieGroup<Rot3, 3> {
      */
     gtsam::Quaternion toQuaternion() const;
 
-#ifdef GTSAM_ALLOW_DEPRECATED_SINCE_V42
     /**
      * Converts to a generic matrix to allow for use with matlab
      * In format: w x y z
-     * @deprecated: use Rot3::toQuaternion() instead.
-     * If still using this API, remind that in the returned Vector `V`,
-     * `V.x()` denotes the actual `qw`, `V.y()` denotes 'qx', `V.z()` denotes `qy`, and `V.w()` denotes 'qz'.
      */
-    Vector GTSAM_DEPRECATED quaternion() const;
-#endif
+    Vector quaternion() const;
 
     /**
      * @brief Spherical Linear intERPolation between *this and other
@@ -569,9 +567,6 @@ class GTSAM_EXPORT Rot3 : public LieGroup<Rot3, 3> {
 #endif
   };
 
-  /// std::vector of Rot3s, mainly for wrapper
-  using Rot3Vector = std::vector<Rot3, Eigen::aligned_allocator<Rot3> >;
-
   /**
    * [RQ] receives a 3 by 3 matrix and returns an upper triangular matrix R
    * and 3 rotation angles corresponding to the rotation matrix Q=Qz'*Qy'*Qx'
@@ -590,6 +585,5 @@ class GTSAM_EXPORT Rot3 : public LieGroup<Rot3, 3> {
 
   template<>
   struct traits<const Rot3> : public internal::LieGroup<Rot3> {};
-  
-}  // namespace gtsam
+}
 

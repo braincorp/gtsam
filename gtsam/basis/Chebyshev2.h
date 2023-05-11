@@ -22,7 +22,8 @@
  *
  * This is different from Chebyshev.h since it leverage ideas from
  * pseudo-spectral optimization, i.e. we don't decompose into basis functions,
- * rather estimate function values at the Chebyshev points.
+ * rather estimate function parameters that enforce function nodes at Chebyshev
+ * points.
  *
  * Please refer to Agrawal21icra for more details.
  *

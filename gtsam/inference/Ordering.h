@@ -70,23 +70,7 @@ public:
         boost::assign_detail::call_push_back<This>(*this))(key);
   }
 
-  /**
-   * @brief Append new keys to the ordering as `ordering += keys`.
-   *
-   * @param key
-   * @return The ordering variable with appended keys.
-   */
-  This& operator+=(KeyVector& keys);
-
-  /// Check if key exists in ordering.
-  bool contains(const Key& key) const;
-
-  /**
-   * @brief Invert (not reverse) the ordering - returns a map from key to order
-   * position.
-   *
-   * @return FastMap<Key, size_t>
-   */
+  /// Invert (not reverse) the ordering - returns a map from key to order position
   FastMap<Key, size_t> invert() const;
 
   /// @name Fill-reducing Orderings @{

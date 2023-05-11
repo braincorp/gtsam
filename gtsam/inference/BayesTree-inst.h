@@ -63,40 +63,20 @@ namespace gtsam {
   }
 
   /* ************************************************************************* */
-  template <class CLIQUE>
-  void BayesTree<CLIQUE>::dot(std::ostream& os,
-                              const KeyFormatter& keyFormatter) const {
-    if (roots_.empty())
-      throw std::invalid_argument(
-          "the root of Bayes tree has not been initialized!");
-    os << "digraph G{\n";
-    for (const sharedClique& root : roots_) dot(os, root, keyFormatter);
-    os << "}";
-    std::flush(os);
-  }
-
-  /* ************************************************************************* */
-  template <class CLIQUE>
-  std::string BayesTree<CLIQUE>::dot(const KeyFormatter& keyFormatter) const {
-    std::stringstream ss;
-    dot(ss, keyFormatter);
-    return ss.str();
-  }
-
-  /* ************************************************************************* */
-  template <class CLIQUE>
-  void BayesTree<CLIQUE>::saveGraph(const std::string& filename,
-                                    const KeyFormatter& keyFormatter) const {
-    std::ofstream of(filename.c_str());
-    dot(of, keyFormatter);
+  template<class CLIQUE>
+  void BayesTree<CLIQUE>::saveGraph(const std::string &s, const KeyFormatter& keyFormatter) const {
+    if (roots_.empty()) throw std::invalid_argument("the root of Bayes tree has not been initialized!");
+    std::ofstream of(s.c_str());
+    of<< "digraph G{\n";
+    for(const sharedClique& root: roots_)
+      saveGraph(of, root, keyFormatter);
+    of<<"}";
     of.close();
   }
 
   /* ************************************************************************* */
-  template <class CLIQUE>
-  void BayesTree<CLIQUE>::dot(std::ostream& s, sharedClique clique,
-                              const KeyFormatter& keyFormatter,
-                              int parentnum) const {
+  template<class CLIQUE>
+  void BayesTree<CLIQUE>::saveGraph(std::ostream &s, sharedClique clique, const KeyFormatter& indexFormatter, int parentnum) const {
     static int num = 0;
     bool first = true;
     std::stringstream out;
@@ -104,10 +84,10 @@ namespace gtsam {
     std::string parent = out.str();
     parent += "[label=\"";
 
-    for (Key key : clique->conditional_->frontals()) {
-      if (!first) parent += ", ";
+    for (Key index : clique->conditional_->frontals()) {
+      if (!first) parent += ",";
       first = false;
-      parent += keyFormatter(key);
+      parent += indexFormatter(index);
     }
 
     if (clique->parent()) {
@@ -116,10 +96,10 @@ namespace gtsam {
     }
 
     first = true;
-    for (Key parentKey : clique->conditional_->parents()) {
-      if (!first) parent += ", ";
+    for (Key sep : clique->conditional_->parents()) {
+      if (!first) parent += ",";
       first = false;
-      parent += keyFormatter(parentKey);
+      parent += indexFormatter(sep);
     }
     parent += "\"];\n";
     s << parent;
@@ -127,7 +107,7 @@ namespace gtsam {
 
     for (sharedClique c : clique->children) {
       num++;
-      dot(s, c, keyFormatter, parentnum);
+      saveGraph(s, c, indexFormatter, parentnum);
     }
   }
 

@@ -8,7 +8,6 @@
 #pragma once
 
 #include <gtsam_unstable/discrete/CSP.h>
-#include <gtsam/discrete/DiscreteBayesNet.h>
 
 namespace gtsam {
 
@@ -135,23 +134,26 @@ class GTSAM_UNSTABLE_EXPORT Scheduler : public CSP {
       const KeyFormatter& formatter = DefaultKeyFormatter) const override;
 
   /** Print readable form of assignment */
-  void printAssignment(const DiscreteValues& assignment) const;
+  void printAssignment(sharedValues assignment) const;
 
   /** Special print for single-student case */
-  void printSpecial(const DiscreteValues& assignment) const;
+  void printSpecial(sharedValues assignment) const;
 
   /** Accumulate faculty stats */
-  void accumulateStats(const DiscreteValues& assignment,
+  void accumulateStats(sharedValues assignment,
                        std::vector<size_t>& stats) const;
 
   /** Eliminate, return a Bayes net */
   DiscreteBayesNet::shared_ptr eliminate() const;
 
+  /** Find the best total assignment - can be expensive */
+  sharedValues optimalAssignment() const;
+
   /** find the assignment of students to slots with most possible committees */
-  DiscreteValues bestSchedule() const;
+  sharedValues bestSchedule() const;
 
   /** find the corresponding most desirable committee assignment */
-  DiscreteValues bestAssignment(const DiscreteValues& bestSchedule) const;
+  sharedValues bestAssignment(sharedValues bestSchedule) const;
 
 };  // Scheduler
 

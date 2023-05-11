@@ -66,8 +66,8 @@ namespace imuBias {
 //    }
 /// ostream operator
 std::ostream& operator<<(std::ostream& os, const ConstantBias& bias) {
-  os << "acc = " << bias.accelerometer().transpose();
-  os << " gyro = " << bias.gyroscope().transpose();
+  os << "acc = " << Point3(bias.accelerometer());
+  os << " gyro = " << Point3(bias.gyroscope());
   return os;
 }
 

@@ -63,9 +63,15 @@ class GTSAM_EXPORT Sampler {
   /// @name access functions
   /// @{
 
-  size_t dim() const { return model_->dim(); }
+  size_t dim() const {
+    assert(model_.get());
+    return model_->dim();
+  }
 
-  Vector sigmas() const { return model_->sigmas(); }
+  Vector sigmas() const {
+    assert(model_.get());
+    return model_->sigmas();
+  }
 
   const noiseModel::Diagonal::shared_ptr& model() const { return model_; }
 
@@ -76,8 +82,6 @@ class GTSAM_EXPORT Sampler {
   /// sample from distribution
   Vector sample() const;
 
-  /// sample with given random number generator
-  static Vector sampleDiagonal(const Vector& sigmas, std::mt19937_64* rng);
   /// @}
 
  protected:

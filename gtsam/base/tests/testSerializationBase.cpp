@@ -19,7 +19,6 @@
 #include <gtsam/inference/Key.h>
 
 #include <gtsam/base/Matrix.h>
-#include <gtsam/base/MatrixSerialization.h>
 #include <gtsam/base/Vector.h>
 #include <gtsam/base/FastList.h>
 #include <gtsam/base/FastMap.h>

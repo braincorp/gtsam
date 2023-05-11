@@ -24,10 +24,11 @@
 namespace gtsam {
 
   /**
-  * A GaussianDensity is a GaussianConditional without parents.
+  * A Gaussian density.
+  *
+  * It is implemented as a GaussianConditional without parents.
   * The negative log-probability is given by \f$ |Rx - d|^2 \f$
   * with \f$ \Lambda = \Sigma^{-1} = R^T R \f$ and \f$ \mu = R^{-1} d \f$
-  * @addtogroup linear
   */
   class GTSAM_EXPORT GaussianDensity : public GaussianConditional {
 
@@ -51,9 +52,8 @@ namespace gtsam {
     GaussianDensity(Key key, const Vector& d, const Matrix& R, const SharedDiagonal& noiseModel = SharedDiagonal()) :
       GaussianConditional(key, d, R, noiseModel) {}
 
-    /// Construct using a mean and standard deviation
-    static GaussianDensity FromMeanAndStddev(Key key, const Vector& mean,
-                                             double sigma);
+    /// Construct using a mean and variance
+    static GaussianDensity FromMeanAndStddev(Key key, const Vector& mean, const double& sigma);
 
     /// print
     void print(const std::string& = "GaussianDensity",

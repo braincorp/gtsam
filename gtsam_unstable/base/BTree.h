@@ -17,8 +17,6 @@
  * @date Feb 3, 2010
  */
 
-#pragma once
-
 #include <stack>
 #include <sstream>
 #include <boost/shared_ptr.hpp>

@@ -40,7 +40,8 @@ T FindKarcherMeanImpl(const vector<T, ALLOC>& rotations) {
   return result.at<T>(kKey);
 }
 
-template <class T>
+template <class T,
+        typename = typename std::enable_if< std::is_same<gtsam::Rot3, T>::value >::type >
 T FindKarcherMean(const std::vector<T>& rotations) {
   return FindKarcherMeanImpl(rotations);
 }

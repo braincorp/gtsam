@@ -17,8 +17,6 @@
  * @date     2/11/16
  */
 
-#pragma once
-
 #include <gtsam_unstable/linear/InfeasibleInitialValues.h>
 
 /******************************************************************************/

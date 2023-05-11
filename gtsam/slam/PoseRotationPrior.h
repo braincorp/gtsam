@@ -39,9 +39,6 @@ protected:
 
 public:
 
-  /** default constructor - only use for serialization */
-  PoseRotationPrior() {}
-
   /** standard constructor */
   PoseRotationPrior(Key key, const Rotation& rot_z, const SharedNoiseModel& model)
   : Base(model, key), measured_(rot_z) {}

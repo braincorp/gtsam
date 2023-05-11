@@ -22,8 +22,6 @@
 #include <gtsam/geometry/Cal3.h>
 #include <gtsam/geometry/Point2.h>
 
-#include <boost/shared_ptr.hpp>
-
 #include <string>
 
 namespace gtsam {

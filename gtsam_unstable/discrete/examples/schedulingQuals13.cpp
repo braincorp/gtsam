@@ -139,7 +139,7 @@ void runLargeExample() {
   // Do brute force product and output that to file
   if (scheduler.nrStudents() == 1) { // otherwise too slow
     DecisionTreeFactor product = scheduler.product();
-    product.dot("scheduling-large", DefaultKeyFormatter, false);
+    product.dot("scheduling-large", false);
   }
 
   // Do exact inference
@@ -153,7 +153,7 @@ void runLargeExample() {
   tictoc_finishedIteration();
   tictoc_print();
   for (size_t i=0;i<100;i++) {
-    auto assignment = sample(*chordal);
+    DiscreteFactor::sharedValues assignment = sample(*chordal);
     vector<size_t> stats(scheduler.nrFaculty());
     scheduler.accumulateStats(assignment, stats);
     size_t max = *max_element(stats.begin(), stats.end());
@@ -167,7 +167,7 @@ void runLargeExample() {
   }
 #else
   gttic(large);
-  auto MPE = scheduler.optimize();
+  DiscreteFactor::sharedValues MPE = scheduler.optimalAssignment();
   gttoc(large);
   tictoc_finishedIteration();
   tictoc_print();
@@ -212,11 +212,11 @@ void solveStaged(size_t addMutex = 2) {
       root->print(""/*scheduler.studentName(s)*/);
 
     // solve root node only
-    size_t bestSlot = root->argmax();
+    Scheduler::Values values;
+    size_t bestSlot = root->solve(values);
 
     // get corresponding count
     DiscreteKey dkey = scheduler.studentKey(NRSTUDENTS - 1 - s);
-    DiscreteValues values;
     values[dkey.first] = bestSlot;
     double count = (*root)(values);
 
@@ -259,7 +259,7 @@ void sampleSolutions() {
   // now, sample schedules
   for (size_t n = 0; n < 10000; n++) {
     vector<size_t> stats(nrFaculty, 0);
-    vector<DiscreteValues> samples;
+    vector<Scheduler::sharedValues> samples;
     for (size_t i = 0; i < NRSTUDENTS; i++) {
       samples.push_back(samplers[i]->sample());
       schedulers[i].accumulateStats(samples[i], stats);

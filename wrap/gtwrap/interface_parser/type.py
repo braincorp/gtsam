@@ -53,10 +53,6 @@ class Typename:
         self.name = t[-1]  # the name is the last element in this list
         self.namespaces = t[:-1]
 
-        # If the first namespace is empty string, just get rid of it.
-        if self.namespaces and self.namespaces[0] == '':
-            self.namespaces.pop(0)
-
         if instantiations:
             if isinstance(instantiations, Sequence):
                 self.instantiations = instantiations  # type: ignore
@@ -96,8 +92,8 @@ class Typename:
         else:
             cpp_name = self.name
         return '{}{}{}'.format(
-            "::".join(self.namespaces),
-            "::" if self.namespaces else "",
+            "::".join(self.namespaces[idx:]),
+            "::" if self.namespaces[idx:] else "",
             cpp_name,
         )
 

@@ -13,31 +13,25 @@
  * @file DiscreteBayesNet.h
  * @date Feb 15, 2011
  * @author Duy-Nguyen Ta
- * @author Frank dellaert
  */
 
 #pragma once
 
-#include <gtsam/discrete/DiscreteConditional.h>
-#include <gtsam/discrete/DiscreteDistribution.h>
+#include <vector>
+#include <map>
+#include <boost/shared_ptr.hpp>
 #include <gtsam/inference/BayesNet.h>
 #include <gtsam/inference/FactorGraph.h>
-
-#include <boost/shared_ptr.hpp>
-#include <map>
-#include <string>
-#include <utility>
-#include <vector>
+#include <gtsam/discrete/DiscreteConditional.h>
 
 namespace gtsam {
 
-/** 
- * A Bayes net made from discrete conditional distributions. 
- * @addtogroup discrete
- */
-class GTSAM_EXPORT DiscreteBayesNet: public BayesNet<DiscreteConditional> {
- public:
-    typedef BayesNet<DiscreteConditional> Base;
+/** A Bayes net made from linear-Discrete densities */
+  class GTSAM_EXPORT DiscreteBayesNet: public BayesNet<DiscreteConditional>
+  {
+  public:
+
+    typedef FactorGraph<DiscreteConditional> Base;
     typedef DiscreteBayesNet This;
     typedef DiscreteConditional ConditionalType;
     typedef boost::shared_ptr<This> shared_ptr;
@@ -46,24 +40,20 @@ class GTSAM_EXPORT DiscreteBayesNet: public BayesNet<DiscreteConditional> {
     /// @name Standard Constructors
     /// @{
 
-    /// Construct empty Bayes net.
+    /** Construct empty factor graph */
     DiscreteBayesNet() {}
 
     /** Construct from iterator over conditionals */
-    template <typename ITERATOR>
-    DiscreteBayesNet(ITERATOR firstConditional, ITERATOR lastConditional)
-        : Base(firstConditional, lastConditional) {}
+    template<typename ITERATOR>
+    DiscreteBayesNet(ITERATOR firstConditional, ITERATOR lastConditional) : Base(firstConditional, lastConditional) {}
 
     /** Construct from container of factors (shared_ptr or plain objects) */
-    template <class CONTAINER>
-    explicit DiscreteBayesNet(const CONTAINER& conditionals)
-        : Base(conditionals) {}
+    template<class CONTAINER>
+    explicit DiscreteBayesNet(const CONTAINER& conditionals) : Base(conditionals) {}
 
-    /** Implicit copy/downcast constructor to override explicit template
-     * container constructor */
-    template <class DERIVEDCONDITIONAL>
-    DiscreteBayesNet(const FactorGraph<DERIVEDCONDITIONAL>& graph)
-        : Base(graph) {}
+    /** Implicit copy/downcast constructor to override explicit template container constructor */
+    template<class DERIVEDCONDITIONAL>
+    DiscreteBayesNet(const FactorGraph<DERIVEDCONDITIONAL>& graph) : Base(graph) {}
 
     /// Destructor
     virtual ~DiscreteBayesNet() {}
@@ -81,73 +71,26 @@ class GTSAM_EXPORT DiscreteBayesNet: public BayesNet<DiscreteConditional> {
     /// @name Standard Interface
     /// @{
 
-    // Add inherited versions of add.
-    using Base::add;
-
-    /** Add a DiscreteDistribution using a table or a string */
-    void add(const DiscreteKey& key, const std::string& spec) {
-      emplace_shared<DiscreteDistribution>(key, spec);
-    }
-
     /** Add a DiscreteCondtional */
-    template <typename... Args>
-    void add(Args&&... args) {
-      emplace_shared<DiscreteConditional>(std::forward<Args>(args)...);
-    }
-        
-    //** evaluate for given DiscreteValues */
-    double evaluate(const DiscreteValues & values) const;
+    void add(const Signature& s);
 
-    //** (Preferred) sugar for the above for given DiscreteValues */
-    double operator()(const DiscreteValues & values) const {
-      return evaluate(values);
-    }
+//    /** Add a DiscreteCondtional in front, when listing parents first*/
+//    GTSAM_EXPORT void add_front(const Signature& s);
+
+    //** evaluate for given Values */
+    double evaluate(const DiscreteConditional::Values & values) const;
 
     /**
-     * @brief do ancestral sampling
-     *
-     * Assumes the Bayes net is reverse topologically sorted, i.e. last
-     * conditional will be sampled first. If the Bayes net resulted from
-     * eliminating a factor graph, this is true for the elimination ordering.
-     *
-     * @return a sampled value for all variables.
-     */
-    DiscreteValues sample() const;
+    * Solve the DiscreteBayesNet by back-substitution
+    */
+    DiscreteFactor::sharedValues optimize() const;
 
-    /**
-     * @brief do ancestral sampling, given certain variables.
-     *
-     * Assumes the Bayes net is reverse topologically sorted *and* that the
-     * Bayes net does not contain any conditionals for the given values.
-     *
-     * @return given values extended with sampled value for all other variables.
-     */
-    DiscreteValues sample(DiscreteValues given) const;
-
-    ///@}
-    /// @name Wrapper support
-    /// @{
-
-    /// Render as markdown tables.
-    std::string markdown(const KeyFormatter& keyFormatter = DefaultKeyFormatter,
-                         const DiscreteFactor::Names& names = {}) const;
-
-    /// Render as html tables.
-    std::string html(const KeyFormatter& keyFormatter = DefaultKeyFormatter,
-                     const DiscreteFactor::Names& names = {}) const;
+    /** Do ancestral sampling */
+    DiscreteFactor::sharedValues sample() const;
 
     ///@}
 
-#ifdef GTSAM_ALLOW_DEPRECATED_SINCE_V42
-    /// @name Deprecated functionality
-    /// @{
-
-    DiscreteValues GTSAM_DEPRECATED optimize() const;
-    DiscreteValues GTSAM_DEPRECATED optimize(DiscreteValues given) const;
-    /// @}
-#endif
-
- private:
+  private:
     /** Serialization function */
     friend class boost::serialization::access;
     template<class ARCHIVE>

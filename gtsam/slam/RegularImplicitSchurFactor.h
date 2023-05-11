@@ -260,6 +260,10 @@ public:
         "RegularImplicitSchurFactor::clone non implemented");
   }
 
+  bool empty() const override {
+    return false;
+  }
+
   GaussianFactor::shared_ptr negate() const override {
     return boost::make_shared<RegularImplicitSchurFactor<CAMERA> >(keys_,
         FBlocks_, PointCovariance_, E_, b_);

@@ -48,14 +48,6 @@ TEST_SUBMODULE(docstring_options, m) {
     {
         py::options options;
         options.disable_user_defined_docstrings();
-        options.disable_function_signatures();
-
-        m.def("test_function8", []() {});
-    }
-
-    {
-        py::options options;
-        options.disable_user_defined_docstrings();
 
         struct DocstringTestFoo {
             int value;
